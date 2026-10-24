@@ -246,12 +246,7 @@ No experimento já realizado, as **10 requisições obtiveram HTTP 200**. Alguma
 | Dados não aparecem no standby | Consulte `pg_stat_replication` e os logs: `docker compose logs --tail=50`. |
 | `npm run seed` não conecta | Verifique que o PostgreSQL primário está ativo na porta `5433` e que `DATABASE_URL` aponta para o banco local. |
 
-## 11. Segurança e versionamento
 
-- Não publique `.env`, tokens, senhas de serviço, credenciais do Neon, `node_modules` ou dados persistidos dos bancos.
-- As credenciais de demonstração usadas no exemplo **não devem** ser reutilizadas em ambientes reais; prefira variáveis de ambiente em qualquer repositório público.
-- Confira os arquivos com `git status` e `git diff --cached --name-only` antes de cada `git push`.
-- Caso credenciais reais já tenham sido publicadas, removê-las de commits novos não basta: revogue/rotacione essas credenciais.
 
 ## Referências
 
