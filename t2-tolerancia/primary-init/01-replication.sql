@@ -1,0 +1,2 @@
+CREATE ROLE replicator
+WITH REPLICATION LOGIN PASSWORD 'replica_demo_2026';

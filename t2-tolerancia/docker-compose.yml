@@ -1,0 +1,58 @@
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    container_name: t2-nginx
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+  primary:
+    image: postgres:16
+    container_name: t2-primary
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_demo_2026
+      POSTGRES_DB: produtos
+    command:
+      - postgres
+      - -c
+      - wal_level=replica
+      - -c
+      - max_wal_senders=10
+    ports:
+      - "5433:5432"
+    volumes:
+      - primary_data:/var/lib/postgresql/data
+      - ./primary-init:/docker-entrypoint-initdb.d
+
+  standby:
+    image: postgres:16
+    container_name: t2-standby
+    environment:
+      POSTGRES_PASSWORD: postgres_demo_2026
+    depends_on:
+      - primary
+    command:
+      - bash
+      - -c
+      - |
+        until pg_isready -h primary -p 5432 -U postgres; do
+          sleep 2
+        done
+        if [ ! -s "$$PGDATA/PG_VERSION" ]; then
+          until PGPASSWORD=replica_demo_2026 pg_basebackup -h primary -D "$$PGDATA" -U replicator -Fp -Xs -P -R; do
+            rm -rf "$$PGDATA"/*
+            sleep 2
+          done
+        fi
+        exec docker-entrypoint.sh postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - standby_data:/var/lib/postgresql/data
+
+volumes:
+  primary_data:
+  standby_data:
